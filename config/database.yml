@@ -16,8 +16,6 @@ development:
   database: proximity_dev
   username: proximity
   password: 12345678
-  # username: postgres
-  # password: 18358068
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
