@@ -37,4 +37,16 @@ RSpec.describe Beacon do
     measurements = Measurement.where(beacon_id: beacon_id)
     expect(measurements.count).to be(0)
   end
+
+  describe '.with_mac_address' do
+    it 'returns the beacon with the desired mac_address' do
+      chair = Chair.create(name: "My Chair")
+      beacon1 = Beacon.create(mac_address: "beacon1", chair: chair)
+      beacon2 = Beacon.create(mac_address: "beacon2", chair: chair)
+
+      result = Beacon.with_mac_address("beacon1")
+
+      expect(result).to contain_exactly(beacon1)
+    end
+  end
 end
