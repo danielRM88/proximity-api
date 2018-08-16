@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe 'Measurement requests' do
-  describe 'POST /measurement' do
+  describe 'POST /measurements' do
     it 'registers the measurements' do
       mac_address_beacon1 = "ac:59:ks:0a:99"
       mac_address_beacon2 = "bc:10:jj:0a:gg"

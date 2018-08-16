@@ -5,3 +5,11 @@
 #
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
+Chair.destroy_all
+chair = Chair.create(name: "My Seed Chair")
+beacon = Beacon.create(chair: chair, mac_address: "0a:bb:1p:00:56")
+
+(1..400).each do |n|
+  value = rand(-75..-45)
+  Measurement.create(chair: chair, beacon: beacon, value: value)
+end
