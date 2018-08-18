@@ -6,7 +6,7 @@ Rails.application.routes.draw do
       get '/predictions' => 'chairs#get_predictions'
     end
   end
-  resources :beacons, only: [:create]
   get 'beacons/fetch_data' => 'beacons#fetch_data'
+  resources :beacons
   resources :measurements, only: [:create]
 end

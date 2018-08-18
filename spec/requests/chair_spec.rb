@@ -6,6 +6,16 @@ RSpec.describe 'Chair requests' do
   end
   after(:all) do
     Chair.destroy_all
+    Beacon.destroy_all
+  end
+
+  describe 'GET /chairs' do
+    it 'should return an array of all chairs in the system' do
+      get('/chairs')
+      json = JSON.parse(response.body)
+
+      expect(json.size).to eq(Chair.count)
+    end
   end
 
   describe 'GET /chairs/:id' do

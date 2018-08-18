@@ -6,21 +6,19 @@
 #  mac_address :string(100)      not null
 #  brand       :string(200)
 #  model       :string(200)
-#  chair_id    :bigint(8)        not null
+#  chair_id    :bigint(8)
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
 #
-
 
 class Beacon < ActiveRecord::Base
 
   MAX_SECONDS_TO_ACTIVE = 5
 
-  belongs_to :chair
+  belongs_to :chair, optional: true
   has_many :measurements, dependent: :destroy
 
-  validates :chair, presence: true
-  validates :mac_address, presence: true, length: { maximum: 100, too_long: "100 characters is the maximum allowed" }
+  validates :mac_address, uniqueness: true, presence: true, length: { maximum: 100, too_long: "100 characters is the maximum allowed" }
   validates :brand, length: { maximum: 200, too_long: "200 characters is the maximum allowed" }
   validates :model, length: { maximum: 200, too_long: "200 characters is the maximum allowed" }
 
@@ -32,5 +30,9 @@ class Beacon < ActiveRecord::Base
     seconds = (Time.current - m.created_at).seconds if m.present?
 
     return (seconds < MAX_SECONDS_TO_ACTIVE)
+  end
+
+  def as_json(options={})
+    super(include: :chair)
   end
 end

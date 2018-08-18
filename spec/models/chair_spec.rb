@@ -47,20 +47,20 @@ RSpec.describe Chair do
     expect(filters.count).to be(0)
   end
 
-  it "destroys dependent beacons when deleted" do
-    chair = Chair.create(name: "My Chair")
-    chair_id = chair.id
-    beacon1 = Beacon.create(mac_address: "beacon1", chair: chair)
-    beacon2 = Beacon.create(mac_address: "beacon2", chair: chair)
-    beacon3 = Beacon.create(mac_address: "beacon3", chair: chair)
+  # it "destroys dependent beacons when deleted" do
+  #   chair = Chair.create(name: "My Chair")
+  #   chair_id = chair.id
+  #   beacon1 = Beacon.create(mac_address: "beacon1", chair: chair)
+  #   beacon2 = Beacon.create(mac_address: "beacon2", chair: chair)
+  #   beacon3 = Beacon.create(mac_address: "beacon3", chair: chair)
 
-    beacons = Beacon.where(chair_id: chair_id)
-    expect(beacons.count).to be(3)
+  #   beacons = Beacon.where(chair_id: chair_id)
+  #   expect(beacons.count).to be(3)
 
-    chair.destroy
-    beacons = Beacon.where(chair_id: chair_id)
-    expect(beacons.count).to be(0)
-  end
+  #   chair.destroy
+  #   beacons = Beacon.where(chair_id: chair_id)
+  #   expect(beacons.count).to be(0)
+  # end
 
   it "destroys dependent predictions when deleted" do
     chair = Chair.create(name: "My Chair")
@@ -89,6 +89,7 @@ RSpec.describe Chair do
     chair.destroy
     measurements = Measurement.where(chair_id: chair_id)
     expect(measurements.count).to be(0)
+    beacon.destroy
   end
 
   it "triggers create_calibration on create" do

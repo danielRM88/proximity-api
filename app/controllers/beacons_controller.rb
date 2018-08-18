@@ -1,10 +1,36 @@
 class BeaconsController < ApplicationController
-  before_action :set_beacon, except: [:create, :fetch_data]
+  before_action :set_beacon, except: [:index, :create, :fetch_data]
+
+  def index
+    beacons = Beacon.all.order(:mac_address)
+
+    render json: beacons, status: 200
+  end
 
   def create
-    beacon = Beacon.create!(beacon_params)
+    beacon = Beacon.new(beacon_params)
 
-    render json: {beacon: beacon, status: 200}
+    if beacon.save
+      render json: {beacon: beacon, status: 200}
+    else
+      render json: {errors: beacon.errors, status: 400}
+    end
+  end
+
+  def show
+    render json: @beacon, status: 200
+  end
+
+  def update
+    @beacon.update(beacon_params)
+
+    render json: {beacon: @beacon, status: 200}
+  end
+
+  def destroy
+    @beacon.destroy
+
+    render json: {message: "beacon deleted", status: 200}
   end
 
   def fetch_data

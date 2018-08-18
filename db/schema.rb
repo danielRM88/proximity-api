@@ -19,7 +19,7 @@ ActiveRecord::Schema.define(version: 20180816064247) do
     t.string "mac_address", limit: 100, null: false
     t.string "brand", limit: 200
     t.string "model", limit: 200
-    t.bigint "chair_id", null: false
+    t.bigint "chair_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["chair_id"], name: "index_beacons_on_chair_id"

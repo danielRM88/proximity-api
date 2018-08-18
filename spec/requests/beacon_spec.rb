@@ -6,6 +6,7 @@ RSpec.describe 'Beacon requests' do
   end
   after(:all) do
     Chair.destroy_all
+    Beacon.destroy_all
   end
 
   describe 'POST /beacons' do

@@ -1,15 +1,25 @@
 namespace :generate do
   desc 'Generate measurements and predictions for simulation'
   task data: :environment do
-    chair = Chair.last
-
+    # Chair.destroy_all
+    chair = Chair.where(name: "My Seed Chair").first
     if chair.blank?
-      Rails.application.load_seed
-      chair = Chair.last
+      chair = Chair.create(name: "My Seed Chair")
     end
 
-    beacon1 = Beacon.first
-    beacon2 = Beacon.last
+    beacon1 = Beacon.where(mac_address: "0a:bb:1p:00:56").first
+    if beacon1.blank?
+      beacon1 = Beacon.create(chair: chair, mac_address: "0a:bb:1p:00:56") 
+    else
+      beacon1.update(chair: chair)
+    end
+    
+    beacon2 = Beacon.where(mac_address: "0c:ss:4o:kk:80").first
+    if beacon2.blank?
+      beacon2 = Beacon.create(chair: chair, mac_address: "0c:ss:4o:kk:80") 
+    else
+      beacon2.update(chair: chair)
+    end
 
     n=200
     variance = 10

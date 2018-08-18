@@ -6,7 +6,7 @@
 #  mac_address :string(100)      not null
 #  brand       :string(200)
 #  model       :string(200)
-#  chair_id    :bigint(8)        not null
+#  chair_id    :bigint(8)
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
 #
@@ -16,7 +16,6 @@ require 'rails_helper'
 RSpec.describe Beacon do
   it { should belong_to(:chair) }
   it { should have_many(:measurements) }
-  it { should validate_presence_of(:chair) }
   it { should validate_presence_of(:mac_address) }
   it { should validate_length_of(:mac_address).is_at_most(100).with_message("100 characters is the maximum allowed") }
   it { should validate_length_of(:brand).is_at_most(200).with_message("200 characters is the maximum allowed") }
