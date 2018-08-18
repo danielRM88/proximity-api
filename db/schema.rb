@@ -57,6 +57,7 @@ ActiveRecord::Schema.define(version: 20180816064247) do
 
   create_table "predictions", force: :cascade do |t|
     t.float "filter_result"
+    t.float "filter_variance"
     t.float "algorithm_result", null: false
     t.boolean "seated", null: false
     t.bigint "chair_id", null: false

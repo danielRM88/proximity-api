@@ -13,6 +13,9 @@
 
 
 class Beacon < ActiveRecord::Base
+
+  MAX_SECONDS_TO_ACTIVE = 5
+
   belongs_to :chair
   has_many :measurements, dependent: :destroy
 
@@ -22,4 +25,12 @@ class Beacon < ActiveRecord::Base
   validates :model, length: { maximum: 200, too_long: "200 characters is the maximum allowed" }
 
   scope :with_mac_address, -> (mac_address) { where(mac_address: mac_address) }
+
+  def active?
+    m = self.measurements.last
+    seconds = MAX_SECONDS_TO_ACTIVE
+    seconds = (Time.current - m.created_at).seconds if m.present?
+
+    return (seconds < MAX_SECONDS_TO_ACTIVE)
+  end
 end

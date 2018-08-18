@@ -4,6 +4,7 @@
 #
 #  id               :bigint(8)        not null, primary key
 #  filter_result    :float
+#  filter_variance  :float
 #  algorithm_result :float            not null
 #  seated           :boolean          not null
 #  chair_id         :bigint(8)        not null

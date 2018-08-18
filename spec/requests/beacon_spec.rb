@@ -32,18 +32,40 @@ RSpec.describe 'Beacon requests' do
     end
   end
 
-  describe 'GET /beacons/:id/fetch_data' do
-    it "fetches the last number of measurements' values for the beacon" do
+  describe 'GET /beacons/fetch_data' do
+    it "fetches the last number of measurements' values for all the beacons" do
       limit = 200
-      params = {limit: limit}
 
-      beacon = Beacon.with_mac_address("0a:bb:1p:00:56").first
+      beacon1 = Beacon.with_mac_address("0a:bb:1p:00:56").first
+      beacon2 = Beacon.with_mac_address("0c:ss:4o:kk:80").first
 
-      get("/beacons/#{beacon.id}/fetch_data", params: params)
+      params = { beacons_ids: [beacon1.id, beacon2.id], limit: limit }
+
+      get("/beacons/fetch_data", params: params)
       json = JSON.parse(response.body)
 
       expect(response).to have_http_status(:success)
-      expect(json['measurements'].size).to be(limit)
+      expect(json["#{beacon1.id}"]['measurements'].size).to be(limit)
+      expect(json["#{beacon1.id}"]['mac_address']).to eq(beacon1.mac_address)
+      expect(json["#{beacon2.id}"]['measurements'].size).to be(limit)
+      expect(json["#{beacon2.id}"]['mac_address']).to eq(beacon2.mac_address)
+    end
+
+    it "returns an empty array if there are no measurements to return" do
+      Measurement.destroy_all
+      limit = 0
+
+      beacon1 = Beacon.with_mac_address("0a:bb:1p:00:56").first
+      beacon2 = Beacon.with_mac_address("0c:ss:4o:kk:80").first
+
+      params = { beacons_ids: [beacon1.id, beacon2.id], limit: limit }
+
+      get("/beacons/fetch_data", params: params)
+      json = JSON.parse(response.body)
+
+      expect(response).to have_http_status(:success)
+      expect(json["#{beacon1.id}"]['measurements'].size).to be(limit)
+      expect(json["#{beacon2.id}"]['measurements'].size).to be(limit)
     end
   end
 end

@@ -23,4 +23,12 @@ class Chair < ActiveRecord::Base
   def create_calibration
     calibration = Calibration.create(chair: self)
   end
+
+  def has_filter
+    return self.filter.present?
+  end
+
+  def as_json(options = {})
+    super(include: :beacons).merge({has_filter: has_filter})
+  end
 end

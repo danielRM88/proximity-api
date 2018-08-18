@@ -49,4 +49,24 @@ RSpec.describe Beacon do
       expect(result).to contain_exactly(beacon1)
     end
   end
+
+  describe '#active' do
+    context 'the beacon has a new measurement in the last 5 seconds' do
+      subject { Beacon.create(chair: Chair.create(name: "chair"), mac_address: "mm:oo:u0:p1:44") }
+
+      it 'returns true' do
+        m = Measurement.create(beacon: subject, chair: subject.chair, value: -56)
+        expect(subject.active?).to be(true)
+      end
+    end
+
+    context 'the beacon has not had a new measurement in the last 5 seconds' do
+      subject { Beacon.create(chair: Chair.create(name: "chair"), mac_address: "mm:oo:u0:p1:44") }
+
+      it 'returns true' do
+        m = Measurement.create(beacon: subject, chair: subject.chair, value: -56, created_at: (Time.current - 5.seconds))
+        expect(subject.active?).to be(false)
+      end
+    end
+  end
 end
