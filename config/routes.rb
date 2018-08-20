@@ -4,6 +4,9 @@ Rails.application.routes.draw do
   resources :chairs do 
     member do
       get '/predictions' => 'chairs#get_predictions'
+      get '/fetch_calibration_progress' => 'chairs#fetch_calibration_progress'
+      post '/start_calibration' => 'chairs#start_calibration'
+      put '/update_filter_process_noise' => 'chairs#update_filter_process_noise'
     end
   end
   get 'beacons/fetch_data' => 'beacons#fetch_data'

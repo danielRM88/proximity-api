@@ -11,9 +11,9 @@ class BeaconsController < ApplicationController
     beacon = Beacon.new(beacon_params)
 
     if beacon.save
-      render json: {beacon: beacon, status: 200}
+      render json: {beacon: beacon}, status: 200
     else
-      render json: {errors: beacon.errors, status: 400}
+      render json: {errors: beacon.errors}, status: 400
     end
   end
 
@@ -22,22 +22,36 @@ class BeaconsController < ApplicationController
   end
 
   def update
-    @beacon.update(beacon_params)
+    result = @beacon.update(beacon_params)
 
-    render json: {beacon: @beacon, status: 200}
+    if result
+      render json: {beacon: @beacon}, status: 200
+    else
+      render json: {erros: @beacon.errors}, status: 400
+    end
   end
 
   def destroy
-    @beacon.destroy
+    result = @beacon.destroy
 
-    render json: {message: "beacon deleted", status: 200}
+    if result
+      render json: {message: "beacon deleted"}, status: 200
+    else 
+      render json: {errors: @beacon.errors}, status: 400
+    end
   end
 
   def fetch_data
     limit = params[:limit]
-    response = {}
+    response = []
 
-    beacons_ids = params[:beacons_ids]
+    chair_id = params[:chair_id]
+
+    if chair_id.present?
+      beacons_ids = Beacon.where(chair_id: chair_id).order(:mac_address).pluck(:id)
+    else
+      beacons_ids = params[:beacons_ids]
+    end
 
     if beacons_ids.class == String
       beacons_ids = JSON.parse(beacons_ids)
@@ -46,10 +60,12 @@ class BeaconsController < ApplicationController
     beacons_ids.each do |id|
       b = Beacon.find(id)
       measurements = b.measurements.order(:id).last(limit)
-      response[b.id] = {mac_address: b.mac_address, active: b.active?, measurements: measurements.pluck(:value)}
+      if measurements.count > 0
+        response << {id: b.id, mac_address: b.mac_address, active: b.active?, measurements: measurements.pluck(:value)}
+      end
     end
 
-    render json: response, status: 200
+    render json: {beacons: response}, status: 200
   end
 
 private 

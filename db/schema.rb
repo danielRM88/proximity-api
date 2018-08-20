@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180816064247) do
+ActiveRecord::Schema.define(version: 20180819064954) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -26,9 +26,18 @@ ActiveRecord::Schema.define(version: 20180816064247) do
     t.index ["mac_address"], name: "index_beacons_on_mac_address", unique: true
   end
 
+  create_table "calibration_data", force: :cascade do |t|
+    t.float "value", null: false
+    t.bigint "chair_id", null: false
+    t.bigint "beacon_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "calibrations", force: :cascade do |t|
     t.bigint "chair_id", null: false
     t.boolean "calibrated", default: false, null: false
+    t.boolean "ongoing", default: false, null: false
     t.integer "records_to_calibrate", default: 100, null: false
     t.index ["chair_id"], name: "index_calibrations_on_chair_id", unique: true
   end
@@ -43,6 +52,13 @@ ActiveRecord::Schema.define(version: 20180816064247) do
 
   create_table "filters", force: :cascade do |t|
     t.bigint "chair_id", null: false
+    t.json "x"
+    t.json "y"
+    t.json "P"
+    t.json "F"
+    t.json "V1"
+    t.json "H"
+    t.json "V2"
     t.index ["chair_id"], name: "index_filters_on_chair_id", unique: true
   end
 
@@ -67,6 +83,8 @@ ActiveRecord::Schema.define(version: 20180816064247) do
   end
 
   add_foreign_key "beacons", "chairs"
+  add_foreign_key "calibration_data", "beacons"
+  add_foreign_key "calibration_data", "chairs"
   add_foreign_key "calibrations", "chairs"
   add_foreign_key "filters", "chairs"
   add_foreign_key "measurements", "beacons"

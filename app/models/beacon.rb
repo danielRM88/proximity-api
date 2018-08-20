@@ -33,6 +33,9 @@ class Beacon < ActiveRecord::Base
   end
 
   def as_json(options={})
-    super(include: :chair)
+    chair_name = "No Chair"
+    chair_name = self.chair.name if self.chair.present?
+    
+    return super().merge(chair_name: chair_name)
   end
 end

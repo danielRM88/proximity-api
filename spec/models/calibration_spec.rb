@@ -5,6 +5,7 @@
 #  id                   :bigint(8)        not null, primary key
 #  chair_id             :bigint(8)        not null
 #  calibrated           :boolean          default(FALSE), not null
+#  ongoing              :boolean          default(FALSE), not null
 #  records_to_calibrate :integer          default(100), not null
 #
 

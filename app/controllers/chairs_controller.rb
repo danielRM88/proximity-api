@@ -11,9 +11,9 @@ class ChairsController < ApplicationController
     chair = Chair.new(chair_params)
 
     if chair.save
-      render json: {chair: chair, status: 200}
+      render json: {chair: chair}, status: 200
     else
-      render json: {errors: chair.errors, status: 400}
+      render json: {errors: chair.errors}, status: 400
     end
   end
 
@@ -22,24 +22,75 @@ class ChairsController < ApplicationController
   end
 
   def update
-    @chair.update(chair_params)
+    result = @chair.update(chair_params)
 
-    render json: {beacon: @chair, status: 200}
+    if result
+      render json: {beacon: @chair}, status: 200
+    else
+      render json: {errors: @chair.errors}, status: 400
+    end
   end
 
   def destroy
-    @chair.destroy
+    result = @chair.destroy
 
-    render json: {message: "chair deleted", status: 200}
+    if result
+      render json: {message: "chair deleted"}, status: 200
+    else
+      render json: {errors: @chair.errors}, status: 400
+    end
   end
 
   def get_predictions
-    chair_id = params[:id]
     limit = params[:limit]
 
-    predictions = Prediction.where(chair_id: chair_id).order(:id).last(limit)
+    predictions = Prediction.where(chair_id: @chair).order(:id).last(limit)
 
     render json: {predictions: predictions}, status: 200
+  end
+
+  def fetch_calibration_progress
+    progress = @chair.get_calibration_progress
+
+    render json: {progress: progress, calibrated: @chair.calibrated?, ongoing: @chair.ongoing_calibration?}, status: 200
+  end
+
+  def start_calibration
+    calibration = params[:calibration]
+    result = @chair.start_calibration calibration[:records_to_calibrate]
+
+    if result
+      render json: {chair: @chair}, status: 200
+    else
+      render json: {errors: @chair.calibration.errors}, status: 400
+    end
+  end
+
+  def stop_calibration
+    @chair.stop_calibration
+
+    render json: {message: "Calibration stopped"}, status: 200
+  end
+
+  def update_filter_process_noise
+    filter = @chair.filter
+    process_error = params[:process_error]
+    result = false
+
+    if filter.present? && 
+      process_error.present? &&
+      filter.V1 = Matrix[[process_error.to_f]]
+      result = filter.save
+    end
+    if result
+      render json: {chair: @chair}, status: 200
+    else
+      if filter.present?
+        render json: {errors: filter.errors}, status: 400
+      else
+        render json: {errors: "Chair does not have a filter"}, status: 404
+      end
+    end
   end
 
 private 
