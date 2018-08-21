@@ -7,16 +7,16 @@ namespace :generate do
       chair = Chair.create(name: "My Seed Chair")
     end
 
-    beacon1 = Beacon.where(mac_address: "0a:bb:1p:00:56").first
+    beacon1 = Beacon.where(mac_address: "30:ae:a4:0d:b9:56").first
     if beacon1.blank?
-      beacon1 = Beacon.create(chair: chair, mac_address: "0a:bb:1p:00:56") 
+      beacon1 = Beacon.create(chair: chair, mac_address: "30:ae:a4:0d:b9:56") 
     else
       beacon1.update(chair: chair)
     end
     
-    beacon2 = Beacon.where(mac_address: "0c:ss:4o:kk:80").first
+    beacon2 = Beacon.where(mac_address: "24:0a:c4:12:ca:ba").first
     if beacon2.blank?
-      beacon2 = Beacon.create(chair: chair, mac_address: "0c:ss:4o:kk:80") 
+      beacon2 = Beacon.create(chair: chair, mac_address: "24:0a:c4:12:ca:ba") 
     else
       beacon2.update(chair: chair)
     end

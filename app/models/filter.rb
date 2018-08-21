@@ -13,8 +13,6 @@
 #  V2       :json
 #
 
-require 'matrix'
-
 class Filter < ActiveRecord::Base
   belongs_to :chair
   serialize :x
@@ -25,7 +23,7 @@ class Filter < ActiveRecord::Base
   serialize :H
   serialize :V2
 
-  def initialize x0 = Matrix[[0.0]], f = Matrix[[1.0]], p = Matrix[[1.0]], v1 = Matrix[[1.0]], h = Matrix[[1.0]], v2 = Matrix[[1.0]]
+  def initialize x0 = Matrix[[0.0]], f = Matrix[[1.0]], p = Matrix[[1.0]], v1 = Matrix[[0.01]], h = Matrix[[1.0]], v2 = Matrix[[1.0]]
     super()
     self.x = x0
     self.F = f

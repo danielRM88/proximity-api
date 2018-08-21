@@ -16,12 +16,23 @@ class Calibration < ActiveRecord::Base
   validates :records_to_calibrate, presence: true, numericality: { less_than_or_equal_to: 100000, greater_than: 0,  only_integer: true }
 
   def progress
-    beacons = self.chair.beacons.count
-    calibrationData = CalibrationData.where(chair_id: chair.id).count
-    denominator = (beacons*self.records_to_calibrate)
-
     progress = 0
-    progress = (calibrationData*100 / denominator) if denominator > 0
+    count = 0
+    beacons = self.chair.beacons
+
+    if beacons.present?
+      beacons.each do |beacon|
+        calibrationData = CalibrationData.where(beacon_id: beacon.id).count
+        if calibrationData > self.records_to_calibrate
+          count += self.records_to_calibrate 
+        else
+          count += calibrationData
+        end
+      end
+      denominator = (beacons.count*self.records_to_calibrate)
+
+      progress = (count*100 / denominator) if denominator > 0
+    end
 
     return progress
   end
@@ -35,7 +46,7 @@ class Calibration < ActiveRecord::Base
   end
 
   def finished?
-    return (progress == 100)
+    return (progress >= 100)
   end
 
   def stop

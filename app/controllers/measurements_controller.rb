@@ -9,10 +9,13 @@ class MeasurementsController < ApplicationController
       if beacon.present?
         chair = beacon.chair
 
-        if chair.ongoing_calibration?
-          CalibrationData.create!(chair: chair, beacon: beacon, value: value)
-        elsif chair.calibrated?
-          Measurement.create!(chair: chair, beacon: beacon, value: value)
+        if chair.present?
+          if chair.ongoing_calibration?
+            CalibrationData.create!(chair: chair, beacon: beacon, value: value)
+            chair.perform_calibration_checks
+          elsif chair.calibrated?
+            Measurement.create!(chair: chair, beacon: beacon, value: value)
+          end
         end
       end
     end

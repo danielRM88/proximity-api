@@ -17,6 +17,7 @@ class Chair < ActiveRecord::Base
   has_many :measurements, dependent: :destroy
   has_many :beacons
   has_many :predictions, dependent: :destroy
+  has_many :calibration_data, dependent: :destroy
 
   validates :name, presence: true, uniqueness: true, length: { maximum: 100, too_long: "100 characters is the maximum allowed" }
 
@@ -39,8 +40,10 @@ class Chair < ActiveRecord::Base
         filter = Filter.new
         filter.chair = self
         filter.save
+        self.calibration.update(calibrated: false)
       elsif self.filter.present? && apply_filter == false
         self.filter.destroy
+        self.calibration.update(calibrated: false)
       end
     end
   end
@@ -67,6 +70,42 @@ class Chair < ActiveRecord::Base
 
   def stop_calibration
     self.calibration.stop
+  end
+
+  def perform_calculations
+    # set filter variables if there is any
+    # Mostly we calculate the covariance matrix for the beacons (V2)
+    variances = []
+    v2 = Matrix.zero(self.beacons.count)
+    data = []
+
+    if self.filter.present?
+      beacons = self.beacons
+      if beacons.present?
+        beacons.each_with_index do |beacon, index|
+          data << CalibrationData.where(beacon_id: beacon.id, chair_id: self.id).order(:beacon_id).pluck(:value)
+          v2[index, index] = data.last.variance
+        end
+      end
+      data.each_with_index do |d, i|
+        data.each_with_index do |d2, j|
+          if i != j
+            v2[i, j] = d.cov(d2)
+          end
+        end
+      end
+
+      filter.V2 = v2
+      filter.save
+    end
+  end
+
+  def perform_calibration_checks
+    if self.calibration.finished?
+      self.stop_calibration
+      self.perform_calculations
+      CalibrationData.where(chair_id: self.id).destroy_all
+    end
   end
 
   def as_json(options = {})

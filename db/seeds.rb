@@ -7,8 +7,8 @@
 #   Character.create(name: 'Luke', movie: movies.first)
 Chair.destroy_all
 chair = Chair.create(name: "My Seed Chair")
-beacon1 = Beacon.create(chair: chair, mac_address: "0a:bb:1p:00:56")
-beacon2 = Beacon.create(chair: chair, mac_address: "0c:ss:4o:kk:80")
+beacon1 = Beacon.create(chair: chair, mac_address: "30:ae:a4:0d:b9:56")
+beacon2 = Beacon.create(chair: chair, mac_address: "24:0a:c4:12:ca:ba")
 
 n=200
 variance = 10
