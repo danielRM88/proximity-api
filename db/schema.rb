@@ -10,10 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180819064954) do
+ActiveRecord::Schema.define(version: 20180823042117) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "algorithms", force: :cascade do |t|
+    t.bigint "chair_id", null: false
+    t.string "algorithm_name", null: false
+    t.json "serialized_class", null: false
+    t.index ["chair_id"], name: "index_algorithms_on_chair_id", unique: true
+  end
 
   create_table "beacons", force: :cascade do |t|
     t.string "mac_address", limit: 100, null: false
@@ -85,6 +92,7 @@ ActiveRecord::Schema.define(version: 20180819064954) do
     t.index ["chair_id"], name: "index_predictions_on_chair_id"
   end
 
+  add_foreign_key "algorithms", "chairs"
   add_foreign_key "beacons", "chairs"
   add_foreign_key "calibration_data", "beacons"
   add_foreign_key "calibration_data", "chairs"

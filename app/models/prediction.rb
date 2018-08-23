@@ -25,7 +25,7 @@ class Prediction < ActiveRecord::Base
   validates :seated, inclusion: { in: [ true, false ] }, allow_nil: false
 
   def self.perform_predictions
-    chairs = Chair.all.order(:id)
+    chairs = Chair.joins(:calibration).joins(:beacons).joins(:algorithm).where(calibrations: {calibrated: true}).order(:id)
 
     chairs.each do |chair|
       beacons = chair.beacons.order(:id)
@@ -62,6 +62,7 @@ class Prediction < ActiveRecord::Base
           output = nil
           variance = nil
           filter = chair.filter
+          algrithm_input = nil
           if filter.present?
             y = Matrix.build(measurements.size, 1){ 0 }
             measurements.each_with_index do |m, index|
@@ -70,13 +71,19 @@ class Prediction < ActiveRecord::Base
             Rails.logger.info "TRAINING FILTER #{y}"
             output = filter.filter y
             variance = filter.P
-            pred.algorithm_result = output[0,0].round(5)
-            pred.seated = pred.algorithm_result < -60 ? true : false
             pred.filter_result = output[0,0].round(5)
             pred.filter_variance = variance[0,0].round(5)
+            algorithm_input = output[0,0]
+          else
+            algorithm_input = (measurements.inject(0) { |r, m| return r + m.value })/measurements.size
           end
 
           # call algorithm
+          algorithm = chair.algorithm
+          seated = algorithm.perform algorithm_input
+          
+          pred.algorithm_result = algorithm_input
+          pred.seated = seated
           result = pred.save
           if result
             measurements.each do |me|

@@ -13,6 +13,7 @@ class Chair < ActiveRecord::Base
   attr_accessor :apply_filter
 
   has_one :filter, dependent: :destroy
+  has_one :algorithm, dependent: :destroy
   has_one :calibration, dependent: :destroy
   has_many :measurements, dependent: :destroy
   has_many :beacons
@@ -70,12 +71,23 @@ class Chair < ActiveRecord::Base
 
   def start_calibration records_to_calibrate
     filter = self.filter
+    algorithm = self.algorithm
     if filter.present?
       filter.destroy
       filter = Filter.new
       filter.chair = self
       filter.save
     end
+    
+    algorithm.destroy if algorithm.present?
+
+    algorithm = Algorithm.new
+    kmeans = Algorithms::KMeans.new
+    algorithm.chair = self
+    algorithm.algorithm_name = kmeans.algorithm_name
+    algorithm.serialized_class = YAML::dump(kmeans)
+    algorithm.save
+
     self.calibration.start records_to_calibrate
   end
 
@@ -91,14 +103,32 @@ class Chair < ActiveRecord::Base
     data = []
     h = []
 
+    mean_sum = 0
+    variance_sum = 0
+
+    beacons = self.beacons
+    beacons.each_with_index do |beacon, index|
+      data << CalibrationData.where(beacon_id: beacon.id, chair_id: self.id).order(:beacon_id).pluck(:value)
+      v2[index, index] = data.last.variance
+      mean_sum += data.last.mean
+      variance_sum += data.last.variance
+    end
+
+    if algorithm.present?
+      kmeans = YAML::load(algorithm.serialized_class)
+      first = (mean_sum/beacons.size)
+      # one standard deviation away from first cluster
+      variance_avg = (variance_sum/beacons.size)
+      second = (first-Math::sqrt(variance_avg))
+      kmeans.set_clusters([first, second])
+      algorithm.algorithm_name = kmeans.algorithm_name
+      algorithm.serialized_class = YAML::dump(kmeans)
+      algorithm.save
+    end
+
     if self.filter.present?
-      beacons = self.beacons
       if beacons.present? && beacons.size > 0
         h = Matrix.build(beacons.size, 1) { 1 }
-        beacons.each_with_index do |beacon, index|
-          data << CalibrationData.where(beacon_id: beacon.id, chair_id: self.id).order(:beacon_id).pluck(:value)
-          v2[index, index] = data.last.variance
-        end
         data.each_with_index do |d, i|
           data.each_with_index do |d2, j|
             if i != j

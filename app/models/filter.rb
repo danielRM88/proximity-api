@@ -11,9 +11,9 @@
 #  V1                    :json
 #  H                     :json
 #  V2                    :json
-#  adjustment_threshold  :float
-#  adjustment_count      :integer
-#  continuous_adjustment :boolean
+#  adjustment_threshold  :float            default(10.0)
+#  adjustment_count      :integer          default(0)
+#  continuous_adjustment :boolean          default(FALSE)
 #
 
 class Filter < ActiveRecord::Base
