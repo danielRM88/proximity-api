@@ -17,6 +17,7 @@ class Prediction < ActiveRecord::Base
 
   belongs_to :chair
   has_many :measurements
+  has_one :ground_truth_value, dependent: :destroy
 
   validates :chair, presence: true
   validates :filter_result, numericality: { less_than_or_equal_to: 1000000 }, allow_nil: true
@@ -84,10 +85,20 @@ class Prediction < ActiveRecord::Base
           
           pred.algorithm_result = algorithm_input
           pred.seated = seated
+
           result = pred.save
           if result
             measurements.each do |me|
               me.update(prediction_id: pred.id)
+            end
+            ground_truth = chair.ground_truth
+            if ground_truth.present? && ground_truth.active?
+              gtv = GroundTruthValue.new(prediction: pred)
+              gtv.seated = ground_truth.seated
+              gtv.gender = ground_truth.gender
+              gtv.height = ground_truth.height
+              gtv.weight = ground_truth.weight
+              gtv.save
             end
           end
         else

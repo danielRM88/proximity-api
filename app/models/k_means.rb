@@ -20,7 +20,7 @@ class KMeans
   end
 
   def algorithm_name
-    return ALGORITHM_NAME
+    return KMeans::ALGORITHM_NAME
   end
 
   def perform x

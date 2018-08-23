@@ -78,19 +78,7 @@ class ChairsController < ApplicationController
         end
       end
 
-      # predictions = Prediction.where(chair_id: @chair).where(seated: false).order(:id).last(limit)
-
-      # seated = predictions.map do |p|
-      #   p.algorithm_result
-      # end
-
-      # predictions = Prediction.where(chair_id: @chair).where(seated: true).order(:id).last(limit)
-
-      # not_seated = predictions.map do |p|
-      #   p.algorithm_result
-      # end
-
-      data << ['', '', '', 'Cluster Means']
+      data << ['', '', '', 'Cluster Means'] if seated.size > 0 || not_seated.size > 0
       if seated.size > not_seated.size
         seated.each_with_index do |value, index|
           v = not_seated[index]
@@ -154,6 +142,26 @@ class ChairsController < ApplicationController
       else
         render json: {errors: "Chair does not have a filter"}, status: 404
       end
+    end
+  end
+
+  def update_ground_truth
+    ground_truth_params = params[:ground_truth]
+    ground_truth = @chair.ground_truth
+    result = false
+
+    ground_truth = GroundTruth.create(chair: @chair) if ground_truth.blank?
+    ground_truth.active = ground_truth_params[:active]
+    ground_truth.seated = ground_truth_params[:seated]
+    ground_truth.gender = ground_truth_params[:gender]
+    ground_truth.height = ground_truth_params[:height]
+    ground_truth.weight = ground_truth_params[:weight]
+    result = ground_truth.save
+
+    if result
+      render json: {chair: @chair}, status: 200
+    else
+      render json: {errors: ground_truth.errors}, status: 400
     end
   end
 

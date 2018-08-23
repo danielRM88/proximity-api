@@ -12,6 +12,7 @@
 class Chair < ActiveRecord::Base
   attr_accessor :apply_filter
 
+  has_one :ground_truth, dependent: :destroy
   has_one :filter, dependent: :destroy
   has_one :algorithm, dependent: :destroy
   has_one :calibration, dependent: :destroy
@@ -21,7 +22,7 @@ class Chair < ActiveRecord::Base
 
   validates :name, presence: true, uniqueness: true, length: { maximum: 100, too_long: "100 characters is the maximum allowed" }
 
-  after_create :create_calibration
+  after_create :create_calibration_and_ground_truth
   before_destroy :remove_beacons_association
 
   after_save :check_filter
@@ -30,8 +31,9 @@ class Chair < ActiveRecord::Base
     self.beacons.update_all(chair_id: nil)
   end
 
-  def create_calibration
+  def create_calibration_and_ground_truth
     calibration = Calibration.create(chair: self)
+    ground_truth = GroundTruth.create(chair: self)
   end
 
   def check_filter
@@ -162,6 +164,6 @@ class Chair < ActiveRecord::Base
   end
 
   def as_json(options = {})
-    super(include: [:beacons, :calibration, :filter]).merge({has_filter: has_filter, calibrated: calibrated?})
+    super(include: [:beacons, :calibration, :filter, :ground_truth]).merge({has_filter: has_filter, calibrated: calibrated?})
   end
 end

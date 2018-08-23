@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180823042117) do
+ActiveRecord::Schema.define(version: 20180823215830) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -72,6 +72,25 @@ ActiveRecord::Schema.define(version: 20180823042117) do
     t.index ["chair_id"], name: "index_filters_on_chair_id", unique: true
   end
 
+  create_table "ground_truth_values", force: :cascade do |t|
+    t.bigint "prediction_id", null: false
+    t.boolean "seated", default: false, null: false
+    t.string "gender", limit: 255
+    t.float "height", default: 0.0
+    t.float "weight", default: 0.0
+    t.index ["prediction_id"], name: "index_ground_truth_values_on_prediction_id", unique: true
+  end
+
+  create_table "ground_truths", force: :cascade do |t|
+    t.bigint "chair_id", null: false
+    t.boolean "active", default: false, null: false
+    t.boolean "seated", default: false, null: false
+    t.string "gender", limit: 255
+    t.float "height", default: 0.0
+    t.float "weight", default: 0.0
+    t.index ["chair_id"], name: "index_ground_truths_on_chair_id", unique: true
+  end
+
   create_table "measurements", force: :cascade do |t|
     t.float "value", null: false
     t.bigint "chair_id", null: false
@@ -98,6 +117,8 @@ ActiveRecord::Schema.define(version: 20180823042117) do
   add_foreign_key "calibration_data", "chairs"
   add_foreign_key "calibrations", "chairs"
   add_foreign_key "filters", "chairs"
+  add_foreign_key "ground_truth_values", "predictions"
+  add_foreign_key "ground_truths", "chairs"
   add_foreign_key "measurements", "beacons"
   add_foreign_key "measurements", "chairs"
   add_foreign_key "measurements", "predictions"
