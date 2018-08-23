@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   # post 'measurement' => 'measurements#create'
   resources :chairs do 
     member do
+      get '/kmeans_data' => 'chairs#get_kmeans_data'
       get '/predictions' => 'chairs#get_predictions'
       get '/fetch_calibration_progress' => 'chairs#fetch_calibration_progress'
       post '/start_calibration' => 'chairs#start_calibration'

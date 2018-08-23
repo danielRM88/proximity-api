@@ -37,7 +37,8 @@ task predictions_task: :environment do
     begin
       Prediction.perform_predictions
     rescue StandardError => ex
-      Rails.logger.info ex.backtrace
+      Rails.logger.error "#{ex.message}"
+      ex.backtrace.each { |line| Rails.logger.error line }
     end
     sleep ENV['INTERVAL'].to_f || 1
   end

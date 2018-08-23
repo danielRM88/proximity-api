@@ -70,6 +70,9 @@ class Chair < ActiveRecord::Base
   end
 
   def start_calibration records_to_calibrate
+    self.measurements.delete_all
+    self.predictions.delete_all
+
     filter = self.filter
     algorithm = self.algorithm
     if filter.present?
@@ -80,9 +83,8 @@ class Chair < ActiveRecord::Base
     end
     
     algorithm.destroy if algorithm.present?
-
     algorithm = Algorithm.new
-    kmeans = Algorithms::KMeans.new
+    kmeans = KMeans.new
     algorithm.chair = self
     algorithm.algorithm_name = kmeans.algorithm_name
     algorithm.serialized_class = YAML::dump(kmeans)
@@ -114,6 +116,7 @@ class Chair < ActiveRecord::Base
       variance_sum += data.last.variance
     end
 
+    algorithm = self.algorithm
     if algorithm.present?
       kmeans = YAML::load(algorithm.serialized_class)
       first = (mean_sum/beacons.size)
@@ -146,9 +149,15 @@ class Chair < ActiveRecord::Base
 
   def perform_calibration_checks
     if self.calibration.finished?
-      self.stop_calibration
-      self.perform_calculations
-      CalibrationData.where(chair_id: self.id).destroy_all
+      begin
+        self.stop_calibration
+        self.perform_calculations
+        CalibrationData.where(chair_id: self.id).destroy_all
+      rescue StandardError => ex
+        ap ex
+        CalibrationData.where(chair_id: self.id).destroy_all
+        self.calibration.update(calibrated: false)
+      end
     end
   end
 

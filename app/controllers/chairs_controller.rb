@@ -45,8 +45,68 @@ class ChairsController < ApplicationController
     limit = params[:limit]
 
     predictions = Prediction.where(chair_id: @chair).order(:id).last(limit)
+    last_prediction = predictions.last
 
-    render json: {predictions: predictions}, status: 200
+    if last_prediction.present?
+      seated = last_prediction.seated
+    else
+      seated = false
+    end
+
+    render json: {predictions: predictions, seated: seated}, status: 200
+  end
+
+  def get_kmeans_data
+    limit = params[:limit]
+
+    algorithm = @chair.algorithm
+    data = []
+    clusters = []
+    seated = []
+    not_seated = []
+    if algorithm.present?
+      kmeans = YAML::load(algorithm.serialized_class)
+      clusters = kmeans.clusters.map{|c| c[:mean]}
+
+      predictions = Prediction.where(chair_id: @chair).order(:id).last(limit)
+
+      predictions.each do |p|
+        if p.seated
+          seated << p.algorithm_result
+        else
+          not_seated << p.algorithm_result
+        end
+      end
+
+      # predictions = Prediction.where(chair_id: @chair).where(seated: false).order(:id).last(limit)
+
+      # seated = predictions.map do |p|
+      #   p.algorithm_result
+      # end
+
+      # predictions = Prediction.where(chair_id: @chair).where(seated: true).order(:id).last(limit)
+
+      # not_seated = predictions.map do |p|
+      #   p.algorithm_result
+      # end
+
+      data << ['', '', '', 'Cluster Means']
+      if seated.size > not_seated.size
+        seated.each_with_index do |value, index|
+          v = not_seated[index]
+          v = 0 if (v.blank? && index == 0)
+          data << [0, value, v, clusters[index]]
+        end
+      else
+        not_seated.each_with_index do |value, index|
+          v = seated[index]
+          v = 0 if (v.blank? && index == 0)
+          data << [0, v, value, clusters[index]]
+        end
+      end
+    end
+
+    render json: {chair_id: @chair.id, data: data}, status: 200
   end
 
   def fetch_calibration_progress

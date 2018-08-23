@@ -1,4 +1,4 @@
-class Algorithms::KMeans
+class KMeans
   attr_accessor :k
   attr_accessor :clusters
 
