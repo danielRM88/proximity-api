@@ -9,6 +9,9 @@ class CreateFilters < ActiveRecord::Migration[5.1]
       t.json :V1
       t.json :H
       t.json :V2
+      t.float :adjustment_threshold, default: 10
+      t.integer :adjustment_count, default: 0
+      t.boolean :continuous_adjustment, default: false
     end
   end
 end

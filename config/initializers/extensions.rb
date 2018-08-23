@@ -15,6 +15,7 @@ class Array
     mean_y = y.inject(0) { |s, a| s += a } / y.size.to_f
     # (covariance)
     cov = self.zip(y).inject(0) { |s, a| s += (a[0] - mean_x) * (a[1] - mean_y) }
+    cov = cov / self.size
     # # (variance)
     # var_x = self.inject(0) { |s, a| s += (a - mean_x) ** 2 }
     # var_y = y.inject(0) { |s, a| s += (a - mean_y) ** 2 }

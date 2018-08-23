@@ -22,7 +22,26 @@ class Beacon < ActiveRecord::Base
   validates :brand, length: { maximum: 200, too_long: "200 characters is the maximum allowed" }
   validates :model, length: { maximum: 200, too_long: "200 characters is the maximum allowed" }
 
+  before_save :check_calibration
+
   scope :with_mac_address, -> (mac_address) { where(mac_address: mac_address) }
+
+  def check_calibration
+    chair_changed = self.changes[:chair_id]
+    if chair_changed.present?
+      previous_chair_id = chair_changed[0]
+      if previous_chair_id.present?
+        previous_chair = Chair.find(previous_chair_id)
+        previous_chair.reset_calibration
+      end
+
+      new_chair_id = chair_changed[1]
+      if new_chair_id.present?
+        new_chair = Chair.find(new_chair_id)
+        new_chair.reset_calibration
+      end
+    end
+  end
 
   def active?
     m = self.measurements.last

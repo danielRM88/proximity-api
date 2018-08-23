@@ -59,6 +59,9 @@ ActiveRecord::Schema.define(version: 20180819064954) do
     t.json "V1"
     t.json "H"
     t.json "V2"
+    t.float "adjustment_threshold", default: 10.0
+    t.integer "adjustment_count", default: 0
+    t.boolean "continuous_adjustment", default: false
     t.index ["chair_id"], name: "index_filters_on_chair_id", unique: true
   end
 

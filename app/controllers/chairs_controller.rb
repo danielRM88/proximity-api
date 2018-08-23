@@ -75,11 +75,15 @@ class ChairsController < ApplicationController
   def update_filter_process_noise
     filter = @chair.filter
     process_error = params[:process_error]
+    continuous_adjustment = params[:continuous_adjustment]
+    adjustment_threshold = params[:adjustment_threshold]
     result = false
 
     if filter.present? && 
-      process_error.present? &&
+      process_error.present?
       filter.V1 = Matrix[[process_error.to_f]]
+      filter.continuous_adjustment = continuous_adjustment if !continuous_adjustment.nil?
+      filter.adjustment_threshold = adjustment_threshold if adjustment_threshold.present?
       result = filter.save
     end
     if result

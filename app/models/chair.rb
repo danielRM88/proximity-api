@@ -17,7 +17,6 @@ class Chair < ActiveRecord::Base
   has_many :measurements, dependent: :destroy
   has_many :beacons
   has_many :predictions, dependent: :destroy
-  has_many :calibration_data, dependent: :destroy
 
   validates :name, presence: true, uniqueness: true, length: { maximum: 100, too_long: "100 characters is the maximum allowed" }
 
@@ -48,6 +47,11 @@ class Chair < ActiveRecord::Base
     end
   end
 
+  def reset_calibration
+    self.filter.destroy if self.filter.present?
+    self.calibration.update(calibrated: false)
+  end
+
   def has_filter
     return self.filter.present?
   end
@@ -65,6 +69,13 @@ class Chair < ActiveRecord::Base
   end
 
   def start_calibration records_to_calibrate
+    filter = self.filter
+    if filter.present?
+      filter.destroy
+      filter = Filter.new
+      filter.chair = self
+      filter.save
+    end
     self.calibration.start records_to_calibrate
   end
 
@@ -78,25 +89,28 @@ class Chair < ActiveRecord::Base
     variances = []
     v2 = Matrix.zero(self.beacons.count)
     data = []
+    h = []
 
     if self.filter.present?
       beacons = self.beacons
-      if beacons.present?
+      if beacons.present? && beacons.size > 0
+        h = Matrix.build(beacons.size, 1) { 1 }
         beacons.each_with_index do |beacon, index|
           data << CalibrationData.where(beacon_id: beacon.id, chair_id: self.id).order(:beacon_id).pluck(:value)
           v2[index, index] = data.last.variance
         end
-      end
-      data.each_with_index do |d, i|
-        data.each_with_index do |d2, j|
-          if i != j
-            v2[i, j] = d.cov(d2)
+        data.each_with_index do |d, i|
+          data.each_with_index do |d2, j|
+            if i != j
+              v2[i, j] = d.cov(d2)
+            end
           end
         end
-      end
 
-      filter.V2 = v2
-      filter.save
+        filter.V2 = v2
+        filter.H = h
+        filter.save
+      end
     end
   end
 
