@@ -124,6 +124,7 @@ class Chair < ActiveRecord::Base
   end
 
   def start_calibration records_to_calibrate
+    self.reset_calibration
     self.measurements.delete_all
     GroundTruthValue.joins(prediction: :chair).where(predictions: {chair_id: self.id}).delete_all
     self.predictions.delete_all

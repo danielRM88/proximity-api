@@ -66,11 +66,14 @@ class ChairsController < ApplicationController
     clusters = []
     seated = []
     not_seated = []
+    pred_seated = false
     if algorithm.present?
       kmeans = YAML::load(algorithm.serialized_class)
       clusters = kmeans.clusters.map{|c| c[:mean]}
 
       predictions = Prediction.where(chair_id: @chair).order(:id).last(limit)
+      last_prediction = predictions.last
+      pred_seated = last_prediction.seated if last_prediction.present?
 
       predictions.each do |p|
         if p.seated
@@ -96,7 +99,9 @@ class ChairsController < ApplicationController
       end
     end
 
-    render json: {chair_id: @chair.id, data: data}, status: 200
+    performance = @chair.performance
+
+    render json: {chair_id: @chair.id, data: data, seated: pred_seated, performance: performance}, status: 200
   end
 
   def fetch_calibration_progress

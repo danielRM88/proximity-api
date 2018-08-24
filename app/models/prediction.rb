@@ -76,7 +76,7 @@ class Prediction < ActiveRecord::Base
             pred.filter_variance = variance[0,0].round(5)
             algorithm_input = output[0,0]
           else
-            algorithm_input = (measurements.inject(0) { |r, m| return r + m.value })/measurements.size
+            algorithm_input = (measurements.inject(0) { |r, m| r + m.value })/measurements.size
           end
 
           # call algorithm
