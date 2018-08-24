@@ -44,7 +44,7 @@ class ChairsController < ApplicationController
   def get_predictions
     limit = params[:limit]
 
-    predictions = Prediction.where(chair_id: @chair).order(:id).last(limit)
+    predictions = Prediction.where(chair_id: @chair.id).order(:id).last(limit)
     last_prediction = predictions.last
 
     if last_prediction.present?
@@ -53,7 +53,9 @@ class ChairsController < ApplicationController
       seated = false
     end
 
-    render json: {predictions: predictions, seated: seated}, status: 200
+    performance = @chair.performance
+
+    render json: {predictions: predictions, seated: seated, performance: performance}, status: 200
   end
 
   def get_kmeans_data

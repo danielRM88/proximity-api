@@ -27,6 +27,58 @@ class Chair < ActiveRecord::Base
 
   after_save :check_filter
 
+  def performance
+    tn = nil
+    fp = nil
+    tp = nil
+    fn = nil
+    accuracy = "0%"
+    precision = "0%"
+    recall = "0%"
+    specificity = "0%"
+
+    ps_with_gtv = self.predictions.joins(:ground_truth_value)
+    if ps_with_gtv.count > 0
+      tn = ps_with_gtv.where(seated: false).where(ground_truth_values: {seated: false}).count
+      fp = ps_with_gtv.where(seated: true).where(ground_truth_values: {seated: false}).count
+      tp = ps_with_gtv.where(seated: true).where(ground_truth_values: {seated: true}).count
+      fn = ps_with_gtv.where(seated: false).where(ground_truth_values: {seated: true}).count
+
+      denominator = tn+fp+tp+fn
+      if denominator > 0
+        accuracy = ""+(((tn+tp).to_f/denominator.to_f).round(2)*100).to_i.to_s+"%"
+      end
+
+      denominator = fp+tp
+      if denominator > 0
+        precision = ""+(((tp).to_f/denominator.to_f).round(2)*100).to_i.to_s+"%"
+      end
+
+      denominator = fn+tp
+      if denominator > 0
+        recall = ""+(((tp).to_f/denominator.to_f).round(2)*100).to_i.to_s+"%"
+      end
+
+      denominator = tn+fp
+      if denominator > 0
+        specificity = ""+(((tn).to_f/denominator.to_f).round(2)*100).to_i.to_s+"%"
+      end
+    end
+
+    performance = {
+      tn: tn,
+      fp: fp,
+      tp: tp,
+      fn: fn,
+      accuracy: accuracy,
+      precision: precision,
+      recall: recall,
+      specificity: specificity
+    }
+
+    return performance
+  end
+
   def remove_beacons_association
     self.beacons.update_all(chair_id: nil)
   end
@@ -73,7 +125,9 @@ class Chair < ActiveRecord::Base
 
   def start_calibration records_to_calibrate
     self.measurements.delete_all
+    GroundTruthValue.joins(prediction: :chair).where(predictions: {chair_id: self.id}).delete_all
     self.predictions.delete_all
+    self.ground_truth.update(active: false)
 
     filter = self.filter
     algorithm = self.algorithm
