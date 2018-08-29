@@ -164,13 +164,22 @@ class Chair < ActiveRecord::Base
 
     mean_sum = 0
     variance_sum = 0
+    sigma = 0
 
     beacons = self.beacons
     beacons.each_with_index do |beacon, index|
       data << CalibrationData.where(beacon_id: beacon.id, chair_id: self.id).order(:beacon_id).pluck(:value)
-      v2[index, index] = data.last.variance
+      var = data.last.variance
+      sd = data.last.standard_deviation
+      sigma = sd if index == 0
+
+      if sigma < sd
+        sigma = sd
+      end
+
+      v2[index, index] = var
       mean_sum += data.last.mean
-      variance_sum += data.last.variance
+      variance_sum += var
     end
 
     algorithm = self.algorithm
@@ -179,7 +188,7 @@ class Chair < ActiveRecord::Base
       first = (mean_sum/beacons.size)
       # one standard deviation away from first cluster
       variance_avg = (variance_sum/beacons.size)
-      second = (first-Math::sqrt(variance_avg))
+      second = (first-2*Math::sqrt(variance_avg))
       kmeans.set_clusters([first, second])
       algorithm.algorithm_name = kmeans.algorithm_name
       algorithm.serialized_class = YAML::dump(kmeans)
@@ -199,9 +208,16 @@ class Chair < ActiveRecord::Base
 
         filter.V2 = v2
         filter.H = h
+        # scalar = 10 - 4*sigma - 8
+        filter.adjustment_threshold = threshold_function(sigma).round(2)
+        filter.continuous_adjustment = false
         filter.save
       end
     end
+  end
+
+  def threshold_function sigma
+    return (30.31776 - (6.681349/0.2202675)*(1 - Math::exp(-0.2202675*sigma)))
   end
 
   def perform_calibration_checks
@@ -211,7 +227,8 @@ class Chair < ActiveRecord::Base
         self.perform_calculations
         CalibrationData.where(chair_id: self.id).destroy_all
       rescue StandardError => ex
-        ap ex
+        ap ex.message
+        ap ex.backtrace
         CalibrationData.where(chair_id: self.id).destroy_all
         self.calibration.update(calibrated: false)
       end

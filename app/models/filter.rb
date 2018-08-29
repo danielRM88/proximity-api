@@ -56,7 +56,7 @@ class Filter < ActiveRecord::Base
       # CONTINUOUS ADJUSTMENT
       if self.continuous_adjustment
         eps = e.transpose*si*e;
-        if eps[0,0] > self.adjustment_threshold
+        if eps[0,0] > self.adjustment_threshold #&& eps[0,0] < self.adjustment_threshold*2
           Rails.logger.info "EPS: #{eps[0,0]} - THRESHOLD: #{self.adjustment_threshold} - COUNT: #{self.adjustment_count}"
           self.V1 = self.V1*PROCESS_NOISE_SCALING_FACTOR
           self.adjustment_count += 1

@@ -84,7 +84,15 @@ class ChairsController < ApplicationController
       end
 
       data << ['', '', '', 'Cluster Means'] if seated.size > 0 || not_seated.size > 0
-      if seated.size > not_seated.size
+      if clusters.size > seated.size && clusters.size > not_seated.size
+        clusters.each_with_index do |value, index|
+          v1 = seated[index]
+          v1 = 0 if (v1.blank? && index == 0)
+          v2 = not_seated[index]
+          v2 = 0 if (v2.blank? && index == 0)
+          data << [0, v1, v2, value]
+        end
+      elsif seated.size > not_seated.size
         seated.each_with_index do |value, index|
           v = not_seated[index]
           v = 0 if (v.blank? && index == 0)
