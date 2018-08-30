@@ -17,6 +17,19 @@ class MeasurementsController < ApplicationController
           elsif chair.calibrated?
             Measurement.create!(chair: chair, beacon: beacon, value: value)
             Rails.logger.info "Measurement #{value} for beacon #{mac_address} stored..."
+
+            # execute predictions thread
+            Thread.new do
+              Rails.application.executor.wrap do
+                begin
+                  chair.perform_predictions
+                rescue StandardError => ex
+                  Rails.logger.error "#{ex.message}"
+                  Rails.logger.error "#{ex.backtrace}"
+                  ex.backtrace.each { |line| Rails.logger.error line }
+                end
+              end
+            end
           end
         end
       end
