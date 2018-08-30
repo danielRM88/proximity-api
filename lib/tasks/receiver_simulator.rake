@@ -1,4 +1,4 @@
-require 'CSV'
+require 'csv'
 task receiver_simulator: :environment do
   session = ActionDispatch::Integration::Session.new(Rails.application)
   measurements_controller = MeasurementsController.new
