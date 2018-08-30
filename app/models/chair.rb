@@ -227,8 +227,8 @@ class Chair < ActiveRecord::Base
         self.perform_calculations
         CalibrationData.where(chair_id: self.id).destroy_all
       rescue StandardError => ex
-        ap ex.message
-        ap ex.backtrace
+        Rails.logger.error ex.message
+        Rails.logger.error ex.backtrace
         CalibrationData.where(chair_id: self.id).destroy_all
         self.calibration.update(calibrated: false)
       end

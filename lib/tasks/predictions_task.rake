@@ -28,16 +28,16 @@ task predictions_task: :environment do
   # end
 
   Signal.trap('TERM') { abort }
+  # Rails.logger.info "Start daemon..."
 
-  Rails.logger.info "Start daemon..."
-
+  Rails.logger.info "RUNNING..."
   loop do
     # Daemon code goes here...
-    Rails.logger.info "RUNNING..."
     begin
       Prediction.perform_predictions
     rescue StandardError => ex
       Rails.logger.error "#{ex.message}"
+      Rails.logger.error "#{ex.backtrace}"
       ex.backtrace.each { |line| Rails.logger.error line }
     end
     sleep ENV['INTERVAL'].to_f || 1

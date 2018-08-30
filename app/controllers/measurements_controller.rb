@@ -12,9 +12,11 @@ class MeasurementsController < ApplicationController
         if chair.present?
           if chair.ongoing_calibration?
             CalibrationData.create!(chair: chair, beacon: beacon, value: value)
+            Rails.logger.info "Calibration data with #{value} for beacon #{mac_address} stored..."
             chair.perform_calibration_checks
           elsif chair.calibrated?
             Measurement.create!(chair: chair, beacon: beacon, value: value)
+            Rails.logger.info "Measurement #{value} for beacon #{mac_address} stored..."
           end
         end
       end

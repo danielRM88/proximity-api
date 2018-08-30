@@ -59,6 +59,7 @@ class Prediction < ActiveRecord::Base
         end
 
         if time_diff <= MAX_TIME_BETWEEN_MEASUREMENTS
+          Rails.logger.info "MEASUREMENTS FOUND"
           pred = Prediction.new(chair_id: chair.id)
           output = nil
           variance = nil
@@ -69,7 +70,7 @@ class Prediction < ActiveRecord::Base
             measurements.each_with_index do |m, index|
               y[index, 0] = m.value
             end
-            Rails.logger.info "TRAINING FILTER #{y}"
+            # Rails.logger.info "TRAINING FILTER #{y}"
             output = filter.filter y
             variance = filter.P
             pred.filter_result = output[0,0].round(5)
@@ -102,10 +103,10 @@ class Prediction < ActiveRecord::Base
             end
           end
         else
-          Rails.logger.info "TIME DIFFERENCE TOO GREAT"
+          # Rails.logger.info "TIME DIFFERENCE TOO GREAT"
         end
       else 
-        Rails.logger.info "NO MEASUREMENTS FOUND"
+        # Rails.logger.info "NO MEASUREMENTS FOUND"
       end
     end
 
