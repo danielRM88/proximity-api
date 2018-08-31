@@ -251,10 +251,11 @@ class Chair < ActiveRecord::Base
     mean_sum = 0
     variance_sum = 0
     sigma = 0
+    no_records = self.calibration.records_to_calibrate
 
     beacons = self.beacons
     beacons.each_with_index do |beacon, index|
-      data << CalibrationData.where(beacon_id: beacon.id, chair_id: self.id).order(:beacon_id).pluck(:value)
+      data << CalibrationData.where(beacon_id: beacon.id, chair_id: self.id).order(:beacon_id).last(no_records).pluck(:value)
       var = data.last.variance
       sd = data.last.standard_deviation
       sigma = sd if index == 0
