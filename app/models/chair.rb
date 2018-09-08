@@ -215,6 +215,7 @@ class Chair < ActiveRecord::Base
     GroundTruthValue.joins(prediction: :chair).where(predictions: {chair_id: self.id}).delete_all
     self.predictions.delete_all
     self.ground_truth.update(active: false)
+    CalibrationData.where(chair_id: self.id).delete_all
 
     filter = self.filter
     algorithm = self.algorithm
