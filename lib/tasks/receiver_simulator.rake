@@ -18,7 +18,7 @@ task receiver_simulator: :environment do
     cont1 +=1
   end
 
-  csv_text = File.read("#{Rails.root}/training/RSSIsensor2.csv")
+  # csv_text = File.read("#{Rails.root}/training/RSSIsensor2.csv")
   # csv_text = File.read("#{Rails.root}/training/DataSet2sensor2.csv")
   csv = CSV.parse(csv_text, :headers => true)
   beacon2 = []
@@ -28,7 +28,7 @@ task receiver_simulator: :environment do
     cont2 += 1
   end
 
-  csv_text = File.read("#{Rails.root}/training/RSSIsensor3.csv")
+  # csv_text = File.read("#{Rails.root}/training/RSSIsensor3.csv")
   csv = CSV.parse(csv_text, :headers => true)
   beacon3 = []
   cont3 = 0
