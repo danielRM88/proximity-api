@@ -276,7 +276,7 @@ class Chair < ActiveRecord::Base
       first = (mean_sum/beacons.size)
       # one standard deviation away from first cluster
       variance_avg = (variance_sum/beacons.size)
-      second = (first-2*Math::sqrt(variance_avg))
+      second = (first-3*Math::sqrt(variance_avg))
       kmeans.set_clusters([first, second])
       algorithm.algorithm_name = kmeans.algorithm_name
       algorithm.serialized_class = YAML::dump(kmeans)

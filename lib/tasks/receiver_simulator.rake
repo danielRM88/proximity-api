@@ -8,8 +8,8 @@ task receiver_simulator: :environment do
   # measurements_controller.create data
   # byebug
   # session.post("/measurements", data)
-  csv_text = File.read("#{Rails.root}/training/RSSIsensor1.csv")
-  # csv_text = File.read("#{Rails.root}/training/DataSet2sensor1.csv")
+  # csv_text = File.read("#{Rails.root}/training/RSSIsensor1.csv")
+  csv_text = File.read("#{Rails.root}/training/DataSet2sensor1.csv")
   csv = CSV.parse(csv_text, :headers => true)
   beacon1 = []
   cont1 = 0
@@ -19,7 +19,7 @@ task receiver_simulator: :environment do
   end
 
   # csv_text = File.read("#{Rails.root}/training/RSSIsensor2.csv")
-  # csv_text = File.read("#{Rails.root}/training/DataSet2sensor2.csv")
+  csv_text = File.read("#{Rails.root}/training/DataSet2sensor2.csv")
   csv = CSV.parse(csv_text, :headers => true)
   beacon2 = []
   cont2 = 0
@@ -41,8 +41,8 @@ task receiver_simulator: :environment do
     (0..times).each do |t|
       (0..cont1).each do |i|
         data = {measurements:[
-          {"value": beacon1[i], "mac_address": "24:0a:c4:12:ac:26"}, 
-          {"value": beacon2[i], "mac_address": "30:ae:a4:0a:68:ee"}
+          {"value": beacon1[i], "mac_address": "24:0a:c4:12:ca:ba"}, 
+          {"value": beacon2[i], "mac_address": "30:ae:a4:0d:b9:56"}
           # {"value": beacon3[i], "mac_address": "24:0a:c4:13:5f:4a"}
         ]}
         session.post("/measurements", {params: data})
